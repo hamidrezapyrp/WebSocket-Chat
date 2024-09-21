@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select User to Chat</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <script>
+        // این تابع کاربران آنلاین را از سرور دریافت می‌کند
+        function loadOnlineUsers() {
+            fetch('/onlineUsers')
+                .then(response => response.json())
+                .then(data => {
+                    let userList = document.getElementById("user-list");
+                    userList.innerHTML = "";  // پاک کردن لیست قبلی
+                    if (data.length === 0) {
+                        userList.innerHTML = "<li>No users online</li>";
+                    } else {
+                        data.forEach(user => {
+                            let li = document.createElement("li");
+                            let a = document.createElement("a");
+                            a.href = "/startChat/" + user;  // لینک برای شروع چت
+                            a.innerText = user;  // نام کاربر
+                            li.appendChild(a);
+                            userList.appendChild(li);
+                        });
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        window.onload = function() {
+            loadOnlineUsers();
+            setInterval(loadOnlineUsers, 5000);  // هر 5 ثانیه لیست را به‌روزرسانی می‌کند
+        };
+    </script>
+</head>
+<body>
+<div class="container">
+    <div class="list-box">
+        <h2>Select a user to chat with:</h2>
+        <ul id="user-list" class="user-list"></ul>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Page</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.3.0/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <script>
+        var stompClient = null;
+        var username = null;
+
+        // استخراج نام کاربر از URL
+        function extractUsername() {
+            var pathArray = window.location.pathname.split('/');
+            return pathArray[pathArray.length - 1];  // گرفتن نام کاربر از آخرین بخش URL
+        }
+
+        // اتصال به WebSocket
+        function connect() {
+            var socket = new SockJS('/chat');
+            stompClient = Stomp.over(socket);
+            stompClient.connect({}, function (frame) {
+                console.log('Connected: ' + frame);
+                stompClient.subscribe('/topic/messages', function (message) {
+                    showMessage(JSON.parse(message.body));
+                });
+            }, function (error) {
+                console.error('WebSocket connection error:', error);
+            });
+        }
+
+        // ارسال پیام به WebSocket
+        function sendMessage() {
+            var content = document.getElementById("message").value;
+            if (stompClient && stompClient.connected && content !== "") {
+                stompClient.send("/app/sendMessage", {}, JSON.stringify({'from': username, 'content': content}));
+                document.getElementById("message").value = "";  // پاک کردن فیلد پیام پس از ارسال
+            } else {
+                alert("Connection not established or message is empty.");
+            }
+        }
+
+        // نمایش پیام دریافت شده
+        function showMessage(message) {
+            var chatArea = document.getElementById("chat-area");
+            var messageElement = document.createElement("div");
+            messageElement.classList.add("message");
+            messageElement.innerHTML = `<strong>${message.from}:</strong> ${message.content}`;
+            chatArea.appendChild(messageElement);
+            chatArea.scrollTop = chatArea.scrollHeight;  // برای نمایش آخرین پیام
+        }
+
+        window.onload = function() {
+            username = extractUsername();  // استخراج نام کاربر از URL
+            connect();  // اتصال به WebSocket بعد از بارگذاری صفحه
+        }
+    </script>
+</head>
+<body>
+<div class="container">
+    <div class="chat-box">
+        <div class="chat-area" id="chat-area"></div>
+        <div class="chat-input-area">
+            <input type="text" id="message" placeholder="Type a message..." class="input-field" />
+            <button onclick="sendMessage()" class="btn">Send</button>
+        </div>
+    </div>
+</div>
+</body>
+</html>

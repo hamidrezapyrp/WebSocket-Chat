@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enter Username</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<div class="container">
+    <div class="form-box">
+        <h1>Welcome to ChatApp</h1>
+        <p>Please enter your username to continue</p>
+        <input type="text" id="username" placeholder="Your Username" class="input-field">
+        <button onclick="submitUsername()" class="btn">Enter Chat</button>
+    </div>
+</div>
+
+<script>
+    function submitUsername() {
+        let username = document.getElementById("username").value;
+        if (username) {
+            window.location.href = "/selectUser/" + username;  // هدایت به صفحه انتخاب کاربر
+        } else {
+            alert("Please enter a username");
+        }
+    }
+</script>
+</body>
+</html>
